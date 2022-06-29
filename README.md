@@ -1,5 +1,8 @@
+# Disclaimer
+* This is a fork of RAD and is not the official work. Refer to their official paper here https://www.sciencedirect.com/science/article/pii/S0031320321006671. 
+* This repo also consists of a modified version of innvestigate 1.0.9. The newest versions can be found here https://github.com/albermax/innvestigate.
+
 # Environment
-* This is the official implementation for "[Relevance Attack on Detectors](https://www.sciencedirect.com/science/article/pii/S0031320321006671)" published in Pattern Recognition.
 ```
 conda create -n rad python=3.6.2
 conda activate rad
