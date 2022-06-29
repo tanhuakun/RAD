@@ -1,6 +1,6 @@
 from utils import *
 
-
+NUM_CLASS = 4
 # The encapulation of model to be attacked
 class Model():
     def __init__(self, model_attack, model_detect, name):
@@ -190,7 +190,7 @@ def rad_coco(load_model, get_index, **kwargs):
                 data_generator=DataGenerator(data_directory=paths['Val'], start_id=args.start_id, end_id=args.end_id, sort_key=lambda x: int(os.path.splitext(x)[0])), 
                 model=load_model(), 
                 get_index=get_index,
-                num_class=80,
+                num_class=NUM_CLASS,
                 **kwargs,
                 )
     rad.attack(alpha=args.alpha, epsilon=args.epsilon, num_iteration=args.num_iteration)

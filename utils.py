@@ -16,12 +16,12 @@ from keras import backend as K
 
 from interpreters import SGLRP
 
-paths = {'Val':   'COCO/val2017',
+paths = {'Val':   'data',
          'Annot': 'COCO/annotations/instances_val2017.json',
          'font':  'font/FiraMono-Medium.otf',
          'yolo_anchors': 'model_data/yolo_anchors.txt',
          'coco_classes': 'model_data/coco_classes.txt'}
-for key in paths: assert os.path.exists(paths[key]), paths[key] + ' does not exist'
+#for key in paths: assert os.path.exists(paths[key]), paths[key] + ' does not exist'
 
 
 def build_direction(loss, input_place, TI=False, transform='1norm'):
