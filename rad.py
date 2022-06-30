@@ -1,3 +1,5 @@
+import numpy
+
 from PIL import Image
 from utils import *
 
@@ -18,15 +20,16 @@ class Model():
 # Cyclic data generator
 class DataGenerator():
     def __init__(self, data_directory, start_id, end_id, sort_key=None):
-        self.data_directory = data_directory
-        self.start_id = start_id
-        self.end_id = end_id
-        self.id = 0
-        self.iter = 0
-        self.length = self.end_id - self.start_id
-        self.file_list = os.listdir(self.data_directory)
-        self.file_list.sort(key=sort_key)
-        self.file_list = self.file_list[self.start_id:self.end_id]
+        # self.data_directory = data_directory
+        # self.start_id = start_id
+        # self.end_id = end_id
+        # self.id = 0
+        # self.iter = 0
+        # self.length = self.end_id - self.start_id
+        # self.file_list = os.listdir(self.data_directory)
+        # self.file_list.sort(key=sort_key)
+        # self.file_list = self.file_list[self.start_id:self.end_id]
+        pass
     
 
     def yield_sample_path(self):
@@ -119,12 +122,14 @@ class RAD():
         bbox_first, bbox_last, bbox0_record, rmse_record = [], [], [], []
 
         fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-        writer = cv2.VideoWriter("detect_attack_1.mp4", fourcc, 30, (416, 244))
+        # writer = cv2.VideoWriter("detect_attack_1.mp4", fourcc, 30, (416, 244))
 
         success, frame = videoCap.read()
         count = 0
 
         while success:
+
+            
             # file = self.data_generator.yield_sample_path()
             # result_dir = result_dir_base + '/detail/' + os.path.splitext(file)[0]
             # os.makedirs(result_dir, exist_ok=True)
@@ -136,7 +141,7 @@ class RAD():
             adv_image = deepcopy(ori_image)
             iou_sorted_index_value = sess.run(self.iou_sorted_index, {self.model.model_attack.input: ori_image})
             ori_detection, ori_bbox_number = self.model.detect(adv_image)
-            heatmaps, imgs = [], []
+            #heatmaps, imgs = [], []
             print()
             
             # attack in each iteration
@@ -152,7 +157,7 @@ class RAD():
                         }, stream=None)
 
                 # append visualization
-                imgs.append(np.array(adv_detection))
+                #imgs.append(np.array(adv_detection))
                 feed_dict ={self.model.model_attack.input: adv_image, 
                             self.index_place:              self.get_index(self.model.model_attack.predict(adv_image)[0]), 
                             self.iou_sorted_index_place:   iou_sorted_index_value}
@@ -187,26 +192,29 @@ class RAD():
             #         }, stream=None)
             
             # save record
-            # ori_detection.save(result_dir + '/detection_ori_%d.png' % ori_bbox_number)
-            # adv_detection.save(result_dir + '/detection_adv_%d.png' % adv_bbox_number)
+            ori_detection.save(f"results/ori_detect/{(str(count)).rjust(6, '0')}")
+            adv_detection.save(f"results/adv_detect/{(str(count)).rjust(6, '0')}")
             # adv_detection.save(result_dir_detection + '/' + os.path.splitext(file)[0] + '.png')
-            # PIL.Image.fromarray(self.model.de_preprocess_image(ori_image)).save(result_dir + '/sample_ori.png')
-           
+            # PIL.Image.fromarray(self.model.de_preprocess_image(ori_image)).save(result_dir + '/sample_ori.png')           
             adv_image = PIL.Image.fromarray(self.model.de_preprocess_image(adv_image))
-
+            adv_image.save(f"results/adv_image/{(str(count)).rjust(6, '0')}")
             # adv_image.save(result_dir + '/sample_adv.png')
             # adv_image.save(result_dir_adv + '/' +  os.path.splitext(file)[0] + '.png')
             # save_images(imgs, result_dir, 'detection.jpg')
             # save_images(heatmaps, result_dir, 'heatmap.jpg')
             # log.close()
 
-            writer.write(adv_image)
+            # open_cv_image = numpy.array(adv_image) 
+            
+            # open_cv_image = cv2.cvtColor(open_cv_image, cv2.COLOR_RGB2BGR)
+
+            # writer.write(open_cv_image)
             success, frame = videoCap.read()
             count += 1
             print(count)
 
 
-        writer.release()
+        # writer.release()
 
 
         
