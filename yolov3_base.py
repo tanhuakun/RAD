@@ -20,7 +20,7 @@ class YOLO(object):
         "classes_path": 'model_data/myclasses.txt',
         "score" : 0.3,
         "iou" : 0.45,
-        "model_image_size" : (416, 416),
+        "model_image_size" : (512, 800),
         "gpu_num" : 1,
     }
 
@@ -733,7 +733,7 @@ def letterbox_image(image, size, return_padding=False):
     new_image = Image.new('RGB', size, (128, 128, 128))
     new_image.paste(image, ((w-nw)//2, (h-nh)//2))
 
-    record = np.zeros((size[0], size[1], 3))
+    record = np.zeros((size[1], size[0], 3))
     record[(h-nh)//2:(h+nh)//2, (w-nw)//2:(w+nw)//2] = 1
     if not return_padding: return new_image
     else: return new_image, record.astype(np.bool), (nh, nw, 3)
