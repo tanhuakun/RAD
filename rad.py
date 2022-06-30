@@ -137,16 +137,23 @@ class RAD():
             img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             img1 = Image.fromarray(img)
+            # ori_image = self.model.preprocess_image(img1)
+            # adv_image = deepcopy(ori_image)
+            REAL_OG_NUMPY = np.expand_dims(np.array(img1, dtype='float32') / 255, 0)
+            ADV_OG = deepcopy(REAL_OG_NUMPY)
+
             ori_image = self.model.preprocess_image(img1)
-            adv_image = deepcopy(ori_image)
+
             iou_sorted_index_value = sess.run(self.iou_sorted_index, {self.model.model_attack.input: ori_image})
-            ori_detection, ori_bbox_number = self.model.detect(adv_image)
+            ori_detection, ori_bbox_number = self.model.detect(ori_image)
             #heatmaps, imgs = [], []
             print()
             
             # attack in each iteration
             for step in range(num_iteration+1):
                 # output
+                temp = PIL.Image.fromarray((ADV_OG[0] * 255).astype(np.uint8))
+                adv_image = self.model.preprocess_image(temp)
                 adv_detection, adv_bbox_number = self.model.detect(adv_image)
                 rmse = np.sqrt(np.mean(np.square(
                     self.model.de_preprocess_image(adv_image).astype(np.float32) -
@@ -172,7 +179,7 @@ class RAD():
                     feed_dict[self.model.model_attack.input] = image
                     return sess.run(self.direction, feed_dict)
                 direction_value = calculate_direction(adv_image, run_direction, DI=('DI' in self.transfer_enhance), SI=('SI' in self.transfer_enhance))
-                adv_image = self.model.attack(adv_image, alpha, direction_value, ori_image, epsilon)
+                ADV_OG = self.model.attack(ADV_OG, alpha, direction_value, REAL_OG_NUMPY, epsilon)
 
             # final operation
             bbox_first.append(ori_bbox_number)

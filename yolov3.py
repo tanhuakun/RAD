@@ -1,7 +1,8 @@
 
 from rad import *
 from yolov3_base import YOLO
-
+import numpy as np
+import cv2
 
 class YOLOv3(Model):
     def __init__(self, model_attack, model_detect):
@@ -22,7 +23,9 @@ class YOLOv3(Model):
         return detection, bbox_number
 
     def attack(self, adv_image, alpha, direction_value, ori_image, epsilon):
-        adv_image[0][self.val_image] = np.clip(adv_image - alpha / 255 * direction_value, 0, 1)[0][self.val_image]
+        direction_value = self.extract_valid_image(direction_value[0]) 
+        direction_value = cv2.resize(direction_value, (adv_image.shape[2], adv_image.shape[1]), interpolation=cv2.INTER_CUBIC)
+        adv_image[0] = np.clip(adv_image[0] - alpha / 255 * direction_value, 0, 1)
         adv_image = np.clip(adv_image, ori_image - epsilon / 255, ori_image + epsilon / 255)
         return adv_image
 
