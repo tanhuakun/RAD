@@ -134,7 +134,7 @@ class RAD():
                             self.index_place:              self.get_index(self.model.model_attack.predict(adv_image)[0]), 
                             self.iou_sorted_index_place:   iou_sorted_index_value}
                 analysis_value = sess.run(self.analysis, feed_dict)
-                heatmaps.append(self.model.extract_valid_image(visualize_lrp(analysis_value, size=ori_image.shape[1])))
+                heatmaps.append(self.model.extract_valid_image(visualize_lrp(analysis_value, size=(ori_image.shape[1], ori_image.shape[2]))))
                 if step == num_iteration: break # visualize the final result with no further update
 
                 # update sample

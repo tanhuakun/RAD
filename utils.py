@@ -131,16 +131,16 @@ def heatmap(heatmap, cmap="seismic", interpolation="none", colorbar=False, M=Non
     plt.tight_layout()
     if colorbar: plt.colorbar()
 
-
-def visualize_lrp(analysis, size=440, get_signature=False):
-    if get_signature: return cv2.resize(analysis / np.max(np.abs(analysis)) * 255, (size, size))
+# size = h,w
+def visualize_lrp(analysis, size=(440, 440), get_signature=False):
+    if get_signature: return cv2.resize(analysis / np.max(np.abs(analysis)) * 255, (size[1], size[0]))
     heatmap(analysis.sum(axis=2))
     buffer_path = str(time.time() + np.random.choice(range(1000))).replace('.', '') + '.png'
     plt.savefig(buffer_path)
     img = PIL.Image.open(buffer_path).convert('RGB')
     os.remove(buffer_path)
     plt.clf()
-    return cv2.resize(np.array(img)[18:458, 100:540, ...], (size, size))
+    return cv2.resize(np.array(img)[18:458, 100:540, ...], (size[1], size[0]))
 
 
 def build_lrp(partial_model, out=None, out_ori=None):
