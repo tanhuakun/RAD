@@ -193,12 +193,12 @@ class RAD():
             #         }, stream=None)
             
             # save record
-            ori_detection.save(f"results/ori_detect/{(str(count)).rjust(6, '0')}")
-            adv_detection.save(f"results/adv_detect/{(str(count)).rjust(6, '0')}")
+            ori_detection.save(f"results/ori_detect/{(str(count)).rjust(6, '0')}.jpg")
+            adv_detection.save(f"results/adv_detect/{(str(count)).rjust(6, '0')}.jpg")
             # adv_detection.save(result_dir_detection + '/' + os.path.splitext(file)[0] + '.png')
             # PIL.Image.fromarray(self.model.de_preprocess_image(ori_image)).save(result_dir + '/sample_ori.png')           
             adv_image = PIL.Image.fromarray(self.model.de_preprocess_image(adv_image))
-            adv_image.save(f"results/adv_image/{(str(count)).rjust(6, '0')}")
+            adv_image.save(f"results/adv_image/{(str(count)).rjust(6, '0')}.jpg")
             # adv_image.save(result_dir + '/sample_adv.png')
             # adv_image.save(result_dir_adv + '/' +  os.path.splitext(file)[0] + '.png')
             # save_images(imgs, result_dir, 'detection.jpg')
