@@ -7,8 +7,8 @@ class YOLOv3(Model):
     def __init__(self, model_attack, model_detect):
         super().__init__(model_attack, model_detect, 'YOLOv3')
     
-    def preprocess_image(self, image_path):
-        image, self.val_image, self.resized = self.model_detect.preprocess_image(PIL.Image.open(image_path).convert('RGB'))
+    def preprocess_image(self, img):
+        image, self.val_image, self.resized = self.model_detect.preprocess_image(img.convert('RGB'))
         return image
 
     def extract_valid_image(self, image):
