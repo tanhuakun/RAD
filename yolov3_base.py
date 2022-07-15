@@ -136,7 +136,7 @@ class YOLO(object):
         out_boxes, out_scores, out_classes = self.sess.run(
             [self.boxes, self.scores, self.classes],
             feed_dict={
-                self.yolo_model.input: image_data,
+                self.yolo_model.input: image,
                 self.input_image_shape: [image.shape[1], image.shape[2]],
                 K.learning_phase(): 0
             })

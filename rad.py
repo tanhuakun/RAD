@@ -124,7 +124,7 @@ class RAD():
 
         success, frame = videoCap.read()
         count = 0
-
+        first_detect_zero = False
         while success:
 
             img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
