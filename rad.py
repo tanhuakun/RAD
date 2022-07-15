@@ -148,6 +148,13 @@ class RAD():
                         'BBox': adv_bbox_number 
                         # 'rmse': rmse,
                         }, stream=None)
+                
+                if first_detect_zero and step >= 3:
+                    break
+
+                if adv_bbox_number == 0 and step == 0:
+                    first_detect_zero = True                  
+                    
 
                 # append visualization
                 #imgs.append(np.array(adv_detection))

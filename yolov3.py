@@ -22,7 +22,7 @@ class YOLOv3(Model):
         return detection, bbox_number
 
     def detect_bbox_num(self, image):
-        image *= self.val_image
+        image[0] *= self.val_image
         return self.model_detect.detect_cv2_bbox_num_fast(image)
 
     def attack(self, adv_image, alpha, direction_value, ori_image, epsilon):

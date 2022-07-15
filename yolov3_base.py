@@ -130,14 +130,14 @@ class YOLO(object):
     def detect_cv2_bbox_num_fast(self, image):
         ## assume letterboxed.
         ## quick function with less memory allocation!
-        image_data /= 255.
-        image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
+        # image /= 255.
+        # image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
 
         out_boxes, out_scores, out_classes = self.sess.run(
             [self.boxes, self.scores, self.classes],
             feed_dict={
                 self.yolo_model.input: image_data,
-                self.input_image_shape: [image.shape[0], image.shape[1]],
+                self.input_image_shape: [image.shape[1], image.shape[2]],
                 K.learning_phase(): 0
             })
         return len(out_boxes)
