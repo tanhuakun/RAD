@@ -2,6 +2,8 @@ import numpy
 
 from PIL import Image
 from utils import *
+from datetime import datetime
+
 
 # The encapulation of model to be attacked
 class Model():
@@ -98,8 +100,11 @@ class RAD():
         # result_dir_detection = result_dir_base + '/detection/' + self.model.name.lower()
         # os.makedirs(result_dir_adv)
         # os.makedirs(result_dir_detection)
+        now = datetime.now()
+        dt_string = now.strftime("%d-%m-%Y-%H-%M")
 
-
+        save_dir = "results_" + dt_string
+        os.makedirs(save_dir, exist_ok=True)
         videoCap = cv2.VideoCapture(video_src) 
 
         # width  = int(videoCap.get(cv2.CAP_PROP_FRAME_WIDTH))   # float `width`
@@ -111,53 +116,43 @@ class RAD():
         # configs.yolo_cfg_width = myround(width, 32)
         # configs.yolo_cfg_height = myround(height, 32)
 
-        
-
-        # prepare variables
         sess = K.get_session()
-        # start_iter = self.data_generator.iter
         start = time.time()
         bbox_first, bbox_last, bbox0_record, rmse_record = [], [], [], []
 
         fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-        # writer = cv2.VideoWriter("detect_attack_1.mp4", fourcc, 30, (416, 244))
 
         success, frame = videoCap.read()
         count = 0
 
         while success:
 
-            
-            # file = self.data_generator.yield_sample_path()
-            # result_dir = result_dir_base + '/detail/' + os.path.splitext(file)[0]
-            # os.makedirs(result_dir, exist_ok=True)
-            # log = open(result_dir + '/log.txt', 'w')
             img = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
             img1 = Image.fromarray(img)
             ori_image = self.model.preprocess_image(img1)
             adv_image = deepcopy(ori_image)
             iou_sorted_index_value = sess.run(self.iou_sorted_index, {self.model.model_attack.input: ori_image})
-            ori_detection, ori_bbox_number = self.model.detect(adv_image)
-            #heatmaps, imgs = [], []
-            print()
             
+            #ori_detection, ori_bbox_number = self.model.detect(adv_image)
+      
             # attack in each iteration
             for step in range(num_iteration+1):
                 # output
-                adv_detection, adv_bbox_number = self.model.detect(adv_image)
-                rmse = np.sqrt(np.mean(np.square(
-                    self.model.de_preprocess_image(adv_image).astype(np.float32) -
-                    self.model.de_preprocess_image(ori_image).astype(np.float32) + 1e-12)))
+                adv_bbox_number = self.model.detect_bbox_num(adv_image)
+
+                # rmse = np.sqrt(np.mean(np.square(
+                #     self.model.de_preprocess_image(adv_image).astype(np.float32) -
+                #     self.model.de_preprocess_image(ori_image).astype(np.float32) + 1e-12)))
                 output({'Iter': '%d/%d' % (step, num_iteration), 
-                        'BBox': adv_bbox_number, 
-                        'rmse': rmse,
+                        'BBox': adv_bbox_number 
+                        # 'rmse': rmse,
                         }, stream=None)
 
                 # append visualization
                 #imgs.append(np.array(adv_detection))
                 feed_dict ={self.model.model_attack.input: adv_image, 
-                            self.index_place:              self.get_index(self.model.model_attack.predict(adv_image)[0]), 
+                            self.index_place:              self.get_index(self.model.model_attack.predict(adv_image)[0], self.num_class), 
                             self.iou_sorted_index_place:   iou_sorted_index_value}
 
                 # analysis_value = sess.run(self.analysis, feed_dict)
@@ -171,32 +166,11 @@ class RAD():
                     return sess.run(self.direction, feed_dict)
                 direction_value = calculate_direction(adv_image, run_direction, DI=('DI' in self.transfer_enhance), SI=('SI' in self.transfer_enhance))
                 adv_image = self.model.attack(adv_image, alpha, direction_value, ori_image, epsilon)
-
-            # final operation
-            bbox_first.append(ori_bbox_number)
-            bbox_last.append(adv_bbox_number)
-            bbox0_record.append(adv_bbox_number == 0)
-            rmse_record.append(rmse)
-
-            # output result for this sample
-            # output({'TimeRm': convert_second_to_time((time.time()-start) / len(bbox_first) * (self.data_generator.length-len(bbox_first))),
-            #         'No': '%d/%d' % (self.data_generator.id + self.data_generator.start_id, self.data_generator.end_id),
-            #         'File': os.path.splitext(file)[0],
-            #         }, stream=None)
-            
-            # # output runing average result
-            # output({'BBoxAVG': '%.2f->%.2f' % (sum(bbox_first) / len(bbox_first), sum(bbox_last) / len(bbox_last)),
-            #         'BBbox0AVG': sum(bbox0_record) / len(bbox0_record) * 100, 
-            #         'rmseAVG': sum(rmse_record) / len(rmse_record),
-            #         }, stream=None)
-            
             # save record
-            ori_detection.save(f"results/ori_detect/{(str(count)).rjust(6, '0')}.jpg")
-            adv_detection.save(f"results/adv_detect/{(str(count)).rjust(6, '0')}.jpg")
             # adv_detection.save(result_dir_detection + '/' + os.path.splitext(file)[0] + '.png')
             # PIL.Image.fromarray(self.model.de_preprocess_image(ori_image)).save(result_dir + '/sample_ori.png')           
             adv_image = PIL.Image.fromarray(self.model.de_preprocess_image(adv_image))
-            adv_image.save(f"results/adv_image/{(str(count)).rjust(6, '0')}.jpg")
+            adv_image.save(f"{save_dir}/{(str(count)).rjust(8, '0')}.jpg")
             # adv_image.save(result_dir + '/sample_adv.png')
             # adv_image.save(result_dir_adv + '/' +  os.path.splitext(file)[0] + '.png')
             # save_images(imgs, result_dir, 'detection.jpg')

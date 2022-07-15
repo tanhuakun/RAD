@@ -21,6 +21,10 @@ class YOLOv3(Model):
         detection, bbox_number = self.model_detect.detect_image(PIL.Image.fromarray(self.de_preprocess_image(image)), return_box_number=True)
         return detection, bbox_number
 
+    def detect_bbox_num(self, image):
+        image *= self.val_image
+        return self.model_detect.detect_cv2_bbox_num_fast(image)
+
     def attack(self, adv_image, alpha, direction_value, ori_image, epsilon):
         adv_image[0][self.val_image] = np.clip(adv_image - alpha / 255 * direction_value, 0, 1)[0][self.val_image]
         adv_image = np.clip(adv_image, ori_image - epsilon / 255, ori_image + epsilon / 255)

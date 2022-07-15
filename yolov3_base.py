@@ -127,9 +127,22 @@ class YOLO(object):
         image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
         return image_data, val_image, resized
 
-    def detect_image(self, image, return_box_number=False):
-        start = timer()
+    def detect_cv2_bbox_num_fast(self, image):
+        ## assume letterboxed.
+        ## quick function with less memory allocation!
+        image_data /= 255.
+        image_data = np.expand_dims(image_data, 0)  # Add batch dimension.
 
+        out_boxes, out_scores, out_classes = self.sess.run(
+            [self.boxes, self.scores, self.classes],
+            feed_dict={
+                self.yolo_model.input: image_data,
+                self.input_image_shape: [image.shape[0], image.shape[1]],
+                K.learning_phase(): 0
+            })
+        return len(out_boxes)
+
+    def detect_image(self, image, return_box_number=False):
         if self.model_image_size != (None, None):
             assert self.model_image_size[0]%32 == 0, 'Multiples of 32 required'
             assert self.model_image_size[1]%32 == 0, 'Multiples of 32 required'
