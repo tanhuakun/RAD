@@ -3,7 +3,6 @@ import numpy
 from PIL import Image
 from utils import *
 
-NUM_CLASS = 4
 # The encapulation of model to be attacked
 class Model():
     def __init__(self, model_attack, model_detect, name):
@@ -45,7 +44,7 @@ class RAD():
                  data_generator,
                  model,
                  get_index,
-                 group_dimension, 
+                 group_dimension_add, 
                  attack_dimension, 
                  num_class, 
                  transfer_enhance,
@@ -53,7 +52,7 @@ class RAD():
         self.data_generator = data_generator
         self.model = model
         self.get_index = get_index
-        self.group_dimension = group_dimension
+        self.group_dimension = group_dimension_add + num_class
         self.attack_dimension = attack_dimension
         self.num_class = num_class
         self.transfer_enhance = transfer_enhance
@@ -84,7 +83,7 @@ class RAD():
             self.direction = build_direction(loss, self.model.model_attack.input, TI=('TI' in self.transfer_enhance), transform='1norm')
     
 
-    def attack(self, alpha, epsilon, num_iteration):
+    def attack(self, alpha, epsilon, num_iteration, video_src):
         # prepare the result dir
         # result_dir_base = get_time(middle='-') + \
         #     '_RAD_%s_%s_Index%dto%d_Eps%d_Iter%d' % \
@@ -100,9 +99,8 @@ class RAD():
         # os.makedirs(result_dir_adv)
         # os.makedirs(result_dir_detection)
 
-        path="./sample_6.mp4"
 
-        videoCap = cv2.VideoCapture(path) 
+        videoCap = cv2.VideoCapture(video_src) 
 
         # width  = int(videoCap.get(cv2.CAP_PROP_FRAME_WIDTH))   # float `width`
         # height = int(videoCap.get(cv2.CAP_PROP_FRAME_HEIGHT))  # float `height`
@@ -301,15 +299,22 @@ def rad_coco(load_model, get_index, **kwargs):
     parser.add_argument('--num_iteration',    default=10,  type=int, help='number of attack iterations')
     parser.add_argument('--start_id',         default=0,   type=int, help='Starting sample ID')
     parser.add_argument('--end_id',           default=5000,type=int, help='Ending sample ID')
+    parser.add_argument('--model_path', default='model_data/sgsignsonly_model.h5', type=str)
+    parser.add_argument('--classes_path', default='model_data/sgsignsonly_classes.txt', type=str)
+    parser.add_argument('--video_src', default='videos/sg_sample.mp4', type=str)
     parser.add_argument('gpu_id', help='GPU(s) used')
     args, _ = parser.parse_known_args()
     os.environ["CUDA_VISIBLE_DEVICES"] = args.gpu_id
     
+    with open(args.classes_path) as f:
+        class_names = f.readlines()
+    num_class = len(class_names)
+    
     rad = RAD(
                 data_generator=DataGenerator(data_directory=paths['Val'], start_id=args.start_id, end_id=args.end_id, sort_key=lambda x: int(os.path.splitext(x)[0])), 
-                model=load_model(), 
+                model=load_model(args.model_path, args.classes_path), 
                 get_index=get_index,
-                num_class=NUM_CLASS,
+                num_class=num_class,
                 **kwargs,
                 )
-    rad.attack(alpha=args.alpha, epsilon=args.epsilon, num_iteration=args.num_iteration)
+    rad.attack(alpha=args.alpha, epsilon=args.epsilon, num_iteration=args.num_iteration, video_src=args.video_src)

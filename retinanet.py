@@ -38,10 +38,10 @@ if __name__ == "__main__":
         model_attack, model_detect = load_net(model_path)
         model = RetinaNet(model_attack, model_detect)
         return model
-    def get_index(pred):
-        pred_reshape = pred.reshape(-1, 80)
+    def get_index(pred, num_class):
+        pred_reshape = pred.reshape(-1, num_class)
         pred_label = np.argmax(pred_reshape, axis=1)
         pred_score = np.max(pred_reshape, axis=1)
-        indexes = np.argsort(pred_score)[::-1] * 80 + pred_label
+        indexes = np.argsort(pred_score)[::-1] * num_class + pred_label
         return indexes[:20]
-    rad_coco(load_model, get_index, group_dimension=80, attack_dimension=0, transfer_enhance=['SI'])
+    rad_coco(load_model, get_index, group_dimension_add=0, attack_dimension=0, transfer_enhance=['SI'])
